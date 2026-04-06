@@ -8,7 +8,9 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     
     <style>
         :root {
@@ -20,28 +22,33 @@
         }
 
         [data-theme="dark"] {
-            --primary: #3b82f6; --primary-light: #1e3a8a;
-            --success: #22c55e; --bg-color: #0f172a;
-            --card-bg: #1e293b; --text-main: #f1f5f9;
-            --text-muted: #94a3b8; --route-color: #a855f7;
-            --danger: #ef4444;
+            --primary: #60a5fa; --primary-light: #1e40af;
+            --success: #34d399; --bg-color: #0a0f1c;
+            --card-bg: #1a2332; --text-main: #f8fafc;
+            --text-muted: #a1a1aa; --route-color: #c084fc;
+            --danger: #f87171;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html { scroll-behavior: smooth; }
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg-color) 0%, #0f172a 100%); color: var(--text-main); padding-bottom: 90px; padding-top: max(0px, env(safe-area-inset-top)); -webkit-user-select: none; user-select: none; transition: background 0.3s ease, color 0.3s ease; }
+        [data-theme="dark"] body { background: linear-gradient(135deg, #0a0f1c 0%, #0f172a 50%, #1e293b 100%); }
 
         header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 18px 20px; padding-top: max(18px, calc(env(safe-area-inset-top) + 8px)); text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.3s ease; }
-        [data-theme="dark"] header { background: rgba(30, 41, 59, 0.95); border-bottom-color: rgba(255,255,255,0.1); }
+        [data-theme="dark"] header { background: linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(20, 27, 42, 0.95) 100%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(96, 165, 250, 0.2); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
         header h3 { margin: 0; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--route-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
         .theme-toggle { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-main); }
         .theme-toggle:hover { background: rgba(0,0,0,0.1); }
-        [data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.1); }
+        [data-theme="dark"] .theme-toggle:hover { background: rgba(96, 165, 250, 0.1); box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); }
 
         .gps-toggle { position: absolute; top: 50%; right: 70px; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-main); }
         .gps-toggle:hover { background: rgba(0,0,0,0.1); }
-        [data-theme="dark"] .gps-toggle:hover { background: rgba(255,255,255,0.1); }
+        [data-theme="dark"] .gps-toggle:hover { background: rgba(96, 165, 250, 0.1); box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); }
+
+        .nearest-toggle { position: absolute; top: 50%; right: 120px; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-main); }
+        .nearest-toggle:hover { background: rgba(0,0,0,0.1); }
+        [data-theme="dark"] .nearest-toggle:hover { background: rgba(96, 165, 250, 0.1); box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2); }
 
         #map { height: 35vh; width: 100%; z-index: 1; box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-radius: 0 0 20px 20px; }
         .container { padding: 20px; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); max-width: 600px; margin: auto; }
@@ -52,8 +59,9 @@
         .building-card { background: var(--card-bg); padding: 20px; margin-bottom: 18px; border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; position: relative; overflow: hidden; transition: all 0.3s ease; animation: fadeInUp 0.5s ease-out; }
         .building-card:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .building-card.visited { border-color: var(--success); background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); }
-        [data-theme="dark"] .building-card { border-color: rgba(255,255,255,0.1); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-        [data-theme="dark"] .building-card.visited { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        [data-theme="dark"] .building-card { border-color: rgba(96, 165, 250, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(96, 165, 250, 0.1); background: linear-gradient(135deg, #1a2332 0%, #141b2a 100%); }
+        [data-theme="dark"] .building-card:hover { box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 165, 250, 0.2); transform: translateY(-3px); }
+        [data-theme="dark"] .building-card.visited { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: rgba(52, 211, 153, 0.3); box-shadow: 0 8px 32px rgba(52, 211, 153, 0.1); }
         @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .gallery-container { display: flex; overflow-x: auto; gap: 12px; margin-bottom: 14px; padding-bottom: 10px; scroll-snap-type: x mandatory; border-radius: 12px; }
@@ -74,15 +82,17 @@
         
         .btn-visited-no { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: var(--text-muted); border: 2px solid #cbd5e1; font-weight: 700; }
         .btn-visited-no:hover { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
-        [data-theme="dark"] .btn-visited-no { background: linear-gradient(135deg, #334155, #475569); border-color: #64748b; color: var(--text-muted); }
-        [data-theme="dark"] .btn-visited-no:hover { background: linear-gradient(135deg, #475569, #64748b); }
+        [data-theme="dark"] .btn-visited-no { background: linear-gradient(135deg, #2a3441, #374151); border-color: #4b5563; color: #9ca3af; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        [data-theme="dark"] .btn-visited-no:hover { background: linear-gradient(135deg, #374151, #4b5563); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); }
         .btn-visited-yes { background: linear-gradient(135deg, var(--success), #059669); color: white; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); font-weight: 700; }
         .btn-visited-yes:hover { box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5); }
         
         .btn-edit { background: linear-gradient(135deg, var(--primary-light), #dbeafe); color: var(--primary); font-weight: 700; }
         .btn-edit:hover { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-        [data-theme="dark"] .btn-edit { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; }
-        [data-theme="dark"] .btn-edit:hover { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        [data-theme="dark"] .btn-edit { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        [data-theme="dark"] .btn-edit:hover { background: linear-gradient(135deg, #3b82f6, #60a5fa); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); }
+        .btn-navigate { background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-navigate:hover { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
         .btn-save { background: linear-gradient(135deg, var(--primary), #2563eb); color: white; margin-top: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
         .btn-save:hover { box-shadow: 0 6px 20px rgba(29, 78, 216, 0.4); }
         .btn-camera { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
@@ -122,6 +132,17 @@
         [data-theme="dark"] #loading-overlay { background: rgba(15, 23, 42, 0.95); }
         .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Highlight marker animation */
+        .highlight-marker {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
         
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 14px 0; }
         [data-theme="dark"] hr { border-top-color: rgba(255,255,255,0.1); }
@@ -131,6 +152,7 @@
 
     <header>
         <h3>🏛️ Αρχιτεκτονική Έρευνα</h3>
+        <button class="nearest-toggle" onclick="window.findNearestBuilding()" title="Βρες το πιο κοντινό μνημείο">🏆</button>
         <button class="gps-toggle" onclick="window.goToMyLocation()" title="Πήγαινε στην Τοποθεσία μου">📍</button>
         <button class="theme-toggle" onclick="window.toggleTheme()" title="Αλλαγή Θέματος">🌙</button>
     </header>
@@ -139,6 +161,7 @@
 
     <div class="container">
         <div class="progress-container" id="progress-bar">Σύνδεση με το Cloud...</div>
+        <div id="counter" style="text-align: center; margin: 10px 0; font-weight: 600; color: var(--text-muted);"></div>
         <div id="buildings-list"></div>
     </div>
 
@@ -289,7 +312,7 @@
                 "architect": "Άγνωστος", 
                 "type": "Σύγχρονη προσθήκη νέου κτιρίου", 
                 "history": "<b>Λεπτομέρειες:</b> Διατηρητέο αστικό κτίριο.<br><b>Προσθήκες/Αλλαγές:</b> Στο πίσω τμήμα κατασκευάστηκε εξ ολοκλήρου νέο κτίριο σύγχρονης αρχιτεκτονικής (γυάλινο κέλυφος, χωρίς μίμηση). Τοποθετήθηκε εκτός του δημόσιου μετώπου.<br><b>Σχέση Παλιού-Νέου:</b> Βασίζεται σε λειτουργική εξάρτηση και χωρική ιεράρχηση. Το ιστορικό κτίριο παραμένει το κύριο αστικό στοιχείο, ενώ ο νέος όγκος λειτουργεί υποστηρικτικά.", 
-                "lat": 37.9771, "lng": 23.7332, "visited": false, "notes": "", "photo_url": "images/image13.jpeg", "user_photos": [] 
+                "lat": 37.9771, "lng": 23.7332, "visited": false, "notes": "", "photo_url": "images/image13jpeg", "user_photos": [] 
             },
             { 
                 "id": 14, 
@@ -361,7 +384,7 @@
                 "architect": "Άγνωστος", 
                 "type": "-", 
                 "history": "Δεν υπάρχουν επαρκείς σημειώσεις στο αρχείο.", 
-                "lat": 37.9810, "lng": 23.7348, "visited": false, "notes": "", "photo_url": "images/image21.jpeg", "user_photos": [] 
+                "lat": 37.9810, "lng": 23.7348, "visited": false, "notes": "", "photo_url": "images/image1.png", "user_photos": [] 
             },
             { 
                 "id": 22, 
@@ -370,7 +393,7 @@
                 "architect": "Άγνωστος", 
                 "type": "-", 
                 "history": "Δεν υπάρχουν επαρκείς σημειώσεις στο αρχείο.", 
-                "lat": 37.9820, "lng": 23.7250, "visited": false, "notes": "", "photo_url": "images/image22.jpeg", "user_photos": [] 
+                "lat": 37.9820, "lng": 23.7250, "visited": false, "notes": "", "photo_url": "images/image2.jpeg", "user_photos": [] 
             },
             { 
                 "id": 23, 
@@ -379,7 +402,7 @@
                 "architect": "Άγνωστος", 
                 "type": "Ένθεση νέου σε παλιό κέλυφος", 
                 "history": "Παράδειγμα ένθεσης νέου σε παλιό κέλυφος.", 
-                "lat": 37.9790, "lng": 23.7330, "visited": false, "notes": "", "photo_url": "images/image23.jpeg", "user_photos": [] 
+                "lat": 37.9790, "lng": 23.7330, "visited": false, "notes": "", "photo_url": "images/image3.jpeg", "user_photos": [] 
             }
         ];
 
@@ -544,18 +567,300 @@
 
         window.goToMyLocation = function() {
             if (navigator.geolocation) {
+                // Show loading message
+                const loadingMsg = document.createElement('div');
+                loadingMsg.id = 'gps-loading';
+                loadingMsg.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background: var(--card-bg); padding: 20px; border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10001;
+                    text-align: center; font-family: Inter, sans-serif;
+                `;
+                loadingMsg.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 10px;">📍</div>
+                    <div style="color: var(--text-main);">Εύρεση τοποθεσίας...</div>
+                `;
+                document.body.appendChild(loadingMsg);
+
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        map.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                        L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup("<b>📍 Είσαι Εδώ!</b>").openPopup();
+                        // Remove loading message
+                        if (loadingMsg && loadingMsg.parentNode) {
+                            loadingMsg.parentNode.removeChild(loadingMsg);
+                        }
+
+                        const userLatLng = [pos.coords.latitude, pos.coords.longitude];
+                        map.flyTo(userLatLng, 17, { duration: 1.0 });
+
+                        // Remove previous user location marker
+                        if (userLocationMarker) {
+                            map.removeLayer(userLocationMarker);
+                        }
+                        if (userLocationCircle) {
+                            map.removeLayer(userLocationCircle);
+                        }
+
+                        const userIcon = L.divIcon({
+                            html: '<div style="background: #ef4444; border: 3px solid white; border-radius: 50%; width: 20px; height: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); position: relative;"><div style="position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 8px solid #ef4444;"></div></div>',
+                            className: 'user-location-marker',
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 18]
+                        });
+
+                        userLocationMarker = L.marker(userLatLng, { icon: userIcon }).addTo(map)
+                            .bindPopup('<div style="font-family: Inter, sans-serif; text-align: center;"><b style="color: #ef4444;">📍 Είσαι Εδώ!</b><br><small>Ακρίβεια: ' + Math.round(pos.coords.accuracy) + 'm</small></div>', { closeButton: false });
+
+                        // Add accuracy circle
+                        userLocationCircle = L.circle(userLatLng, {
+                            color: '#ef4444',
+                            fillColor: '#ef4444',
+                            fillOpacity: 0.1,
+                            radius: pos.coords.accuracy
+                        }).addTo(map);
+
+                        // Open popup immediately
+                        userLocationMarker.openPopup();
+
+                        // Start continuous location tracking
+                        startLocationTracking();
                     },
                     (err) => {
-                        alert("Δεν δόθηκε άδεια GPS. Δεν μπορώ να βρω την τοποθεσία σου.");
+                        // Remove loading message
+                        if (loadingMsg && loadingMsg.parentNode) {
+                            loadingMsg.parentNode.removeChild(loadingMsg);
+                        }
+
+                        let errorMsg = "Δεν δόθηκε άδεια GPS ή δεν βρέθηκε τοποθεσία.";
+                        if (err.code === 1) errorMsg = "Δεν δόθηκε άδεια GPS. Παρακαλώ ενεργοποιήστε την τοποθεσία.";
+                        else if (err.code === 2) errorMsg = "Δεν βρέθηκε σήμα GPS. Δοκιμάστε σε εξωτερικό χώρο.";
+                        else if (err.code === 3) errorMsg = "Προέκυψε timeout. Δοκιμάστε ξανά.";
+                        alert(errorMsg);
                     },
-                    { enableHighAccuracy: true }
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 30000
+                    }
                 );
             } else {
                 alert("Το GPS δεν υποστηρίζεται από αυτή τη συσκευή.");
+            }
+        };
+
+        // Location tracking variables
+        let userLocationMarker = null;
+        let userLocationCircle = null;
+        let locationWatchId = null;
+
+        function startLocationTracking() {
+            if (locationWatchId) {
+                navigator.geolocation.clearWatch(locationWatchId);
+            }
+
+            locationWatchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    const userLatLng = [pos.coords.latitude, pos.coords.longitude];
+
+                    // Update marker position
+                    if (userLocationMarker) {
+                        userLocationMarker.setLatLng(userLatLng);
+                        userLocationMarker.setPopupContent('<div style="font-family: Inter, sans-serif; text-align: center;"><b style="color: #ef4444;">📍 Είσαι Εδώ!</b><br><small>Ακρίβεια: ' + Math.round(pos.coords.accuracy) + 'm</small></div>');
+                    }
+
+                    // Update accuracy circle
+                    if (userLocationCircle) {
+                        userLocationCircle.setLatLng(userLatLng);
+                        userLocationCircle.setRadius(pos.coords.accuracy);
+                    }
+                },
+                (err) => {
+                    console.log('Location tracking error:', err);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 5000
+                }
+            );
+        }
+
+        function stopLocationTracking() {
+            if (locationWatchId) {
+                navigator.geolocation.clearWatch(locationWatchId);
+                locationWatchId = null;
+            }        }
+
+window.navigateToBuilding = function(buildingId) {
+            const building = buildings.find(b => b.id === buildingId);
+            if (!building) return;
+
+            // ΛΥΣΗ 1: Αν δεν έχουμε GPS, το ζητάμε αυτόματα αντί να βγάζουμε απλό alert
+            if (!userLocationMarker) {
+                alert("📍 Γίνεται αναζήτηση της τοποθεσίας σου! Παρακαλώ περίμενε 1-2 δευτερόλεπτα και ξαναπάτα 'Οδηγίες'.");
+                window.goToMyLocation(); // Καλεί αυτόματα την εύρεση τοποθεσίας
+                return;
+            }
+
+            const userPos = userLocationMarker.getLatLng();
+            const buildingPos = [building.lat, building.lng];
+
+            // Αφαίρεση παλιάς διαδρομής
+            if (routeLayer) {
+                map.removeLayer(routeLayer);
+            }
+
+            // Δημιουργία νέας διαδρομής
+            const routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(userPos.lat, userPos.lng),
+                    L.latLng(buildingPos[0], buildingPos[1])
+                ],
+                routeWhileDragging: false,
+                addWaypoints: false,
+                createMarker: function() { return null; }, // Όχι default markers
+                lineOptions: {
+                    styles: [{ color: 'var(--route-color)', weight: 6, opacity: 0.8 }]
+                },
+                language: 'el',
+                // ΛΥΣΗ 2: Σωστή ρύθμιση του δωρεάν OSRM router (διαγράφηκε το Graphhopper)
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1'
+                })
+            }).addTo(map);
+
+            routingControl.on('routesfound', function(e) {
+                const routes = e.routes;
+                const route = routes[0];
+
+                const routeCoords = route.coordinates;
+                routeLayer = L.polyline(routeCoords, {
+                    color: 'var(--route-color)',
+                    weight: 6,
+                    opacity: 0.8,
+                    dashArray: '10, 10'
+                }).addTo(map);
+
+                const totalDistance = route.summary.totalDistance;
+                const totalTime = route.summary.totalTime;
+
+                // Εμφάνιση οδηγιών
+                const routeInfo = document.createElement('div');
+                routeInfo.id = 'route-info';
+                routeInfo.style.cssText = `
+                    position: fixed; bottom: 100px; left: 20px; right: 20px;
+                    background: var(--card-bg); padding: 16px; border-radius: 12px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000;
+                    font-family: Inter, sans-serif; max-height: 200px; overflow-y: auto;
+                `;
+
+                let instructionsHTML = '<div style="margin-bottom: 12px;"><b>🧭 Οδηγίες Διαδρομής:</b></div>';
+                route.instructions.forEach((instruction, index) => {
+                    instructionsHTML += `<div style="margin-bottom: 8px; padding: 8px; background: rgba(96, 165, 250, 0.1); border-radius: 6px; border-left: 3px solid var(--primary);">
+                        <b>${index + 1}.</b> ${instruction.text}<br>
+                        <small style="color: var(--text-muted);">Απόσταση: ${Math.round(instruction.distance)}m</small>
+                    </div>`;
+                });
+
+                routeInfo.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div><b>📍 Προς: ${building.title}</b></div>
+                        <button onclick="this.parentElement.parentElement.remove(); if(routeLayer) map.removeLayer(routeLayer); routeLayer = null;" style="background: none; border: none; font-size: 1.2rem; cursor: pointer;">✕</button>
+                    </div>
+                    <div style="margin-bottom: 12px; color: var(--text-muted);">
+                        📏 Απόσταση: ${Math.round(totalDistance)}m | ⏱️ Χρόνος: ${Math.round(totalTime / 60)}min
+                    </div>
+                    ${instructionsHTML}
+                `;
+
+                // Καθαρίζουμε παλιές οδηγίες αν υπάρχουν
+                const oldRouteInfo = document.getElementById('route-info');
+                if (oldRouteInfo) oldRouteInfo.remove();
+                
+                document.body.appendChild(routeInfo);
+                map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+
+                const targetMarker = buildingMarkers[buildingId];
+                if (targetMarker) {
+                    targetMarker.setIcon(L.divIcon({
+                        html: '<div style="background: #fbbf24; border: 3px solid white; border-radius: 50%; width: 24px; height: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 12px; animation: pulse 1s infinite;">🏛️</div>',
+                        className: 'custom-marker highlight-marker',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    }));
+
+                    setTimeout(() => {
+                        targetMarker.setIcon(unvisitedIcon);
+                    }, 3000);
+                }
+            });
+
+            setTimeout(() => {
+                map.removeControl(routingControl);
+            }, 1000);
+        };
+
+        window.findNearestBuilding = function() {
+            if (!userLocationMarker) {
+                alert("Πρώτα ενεργοποιήστε το GPS για να βρω το κοντινότερο μνημείο!");
+                return;
+            }
+
+            const userPos = userLocationMarker.getLatLng();
+            let nearestBuilding = null;
+            let minDistance = Infinity;
+
+            // Find nearest unvisited building
+            buildings.forEach(building => {
+                if (!building.visited) {
+                    const distance = getDistance(userPos.lat, userPos.lng, building.lat, building.lng);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestBuilding = building;
+                    }
+                }
+            });
+
+            if (!nearestBuilding) {
+                alert("Έχεις επισκεφτεί όλα τα μνημεία! 🎉");
+                return;
+            }
+
+            // Fly to the building
+            map.flyTo([nearestBuilding.lat, nearestBuilding.lng], 18, { duration: 1.5 });
+
+            // Highlight the marker
+            const marker = buildingMarkers[nearestBuilding.id];
+            if (marker) {
+                marker.setIcon(L.divIcon({
+                    html: '<div style="background: #fbbf24; border: 3px solid white; border-radius: 50%; width: 28px; height: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 14px; animation: pulse 1s infinite;">🏆</div>',
+                    className: 'custom-marker highlight-marker',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                }));
+
+                // Open popup with distance info
+                marker.bindPopup(`<div style="font-family: Inter, sans-serif; text-align: center;">
+                    <b style="color: #fbbf24; font-size: 16px;">🏆 Κοντινότερο Μνημείο!</b><br>
+                    <b>${nearestBuilding.title}</b><br>
+                    <span style="color: var(--text-muted);">📍 ${nearestBuilding.address}</span><br>
+                    <span style="color: #10b981;">📏 Απόσταση: ${Math.round(minDistance)} μέτρα</span>
+                </div>`).openPopup();
+
+                // Reset icon after 3 seconds
+                setTimeout(() => {
+                    marker.setIcon(unvisitedIcon);
+                }, 3000);
+            }
+
+            // Scroll to the building card
+            const buildingCard = document.querySelector(`[onclick*="toggleVisited(${buildings.indexOf(nearestBuilding)})"]`);
+            if (buildingCard) {
+                buildingCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Highlight the card temporarily
+                buildingCard.style.boxShadow = '0 0 0 3px rgba(251, 191, 36, 0.5)';
+                setTimeout(() => {
+                    buildingCard.style.boxShadow = '';
+                }, 3000);
             }
         };
 
@@ -587,44 +892,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.renderApp = function(buildingsToShow = buildings) {
-            const listContainer = document.getElementById('buildings-list');
-            listContainer.innerHTML = '';
-            
-            map.eachLayer((layer) => { if (layer instanceof L.Marker) layer.remove(); });
-            buildingMarkers = {}; // Reset markers
-
-            let visitedCount = buildings.filter(b => b.visited).length;
-            document.getElementById('progress-bar').innerText = `Πρόοδος: ${visitedCount} από ${buildings.length} 🎯`;
-
-            // Separate unvisited and visited buildings
-            let unvisitedBuildings = buildingsToShow.filter(b => !b.visited);
-            let visitedBuildings = buildingsToShow.filter(b => b.visited);
-
-            // Render unvisited first (with markers)
-            unvisitedBuildings.forEach((b) => {
-                let originalIndex = buildings.findIndex(orig => orig.id === b.id);
-                let markerIcon = '📍';
-                let marker = L.marker([b.lat, b.lng]).addTo(map).bindPopup(`<b>${markerIcon} ${b.title}</b>`);
-                buildingMarkers[b.id] = marker; // Store marker reference
-
-                renderBuildingCard(b, originalIndex, listContainer);
-            });
-
-            // Render visited buildings at the bottom (no markers)
-            if (visitedBuildings.length > 0) {
-                const separator = document.createElement('div');
-                separator.style.cssText = 'text-align: center; margin: 20px 0; color: var(--text-muted); font-weight: 600;';
-                separator.innerHTML = '✅ Επισκεφθέντα Κτήρια';
-                listContainer.appendChild(separator);
-
-                visitedBuildings.forEach((b) => {
-                    let originalIndex = buildings.findIndex(orig => orig.id === b.id);
-                    renderBuildingCard(b, originalIndex, listContainer);
-                });
-            }
-        };
-
         function renderBuildingCard(b, originalIndex, listContainer) {
             let photosArray = b.user_photos ? [...b.user_photos] : [];
             let galleryHTML = `<div class="gallery-container">`;
@@ -655,7 +922,10 @@
                     ${b.visited ? '✅ Το επισκέφτηκα' : '⭕ Σημείωσε ότι το επισκέφτηκα'}
                 </button>
 
-                <button class="btn btn-edit" onclick="window.toggleEdit(${originalIndex})">📝 Σημειώσεις & Φωτό</button>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button class="btn btn-edit" onclick="window.toggleEdit(${originalIndex})" style="flex: 1;">📝 Σημειώσεις & Φωτό</button>
+                    <button class="btn btn-navigate" onclick="window.navigateToBuilding(${b.id})" style="flex: 1;">🧭 Οδηγίες</button>
+                </div>
 
                 <div class="edit-section" id="edit-${originalIndex}">
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; line-height:1.7; background:#fff; padding:12px; border-radius:10px; border-left:3px solid var(--primary);">
@@ -719,15 +989,64 @@
             });
         };
 
-        // ΕΚΚΙΝΗΣΗ!
-        window.renderApp(); // 1. Ζωγραφίζει αμέσως τα τοπικά δεδομένα χωρίς καθυστέρηση
-        loadFromFirebase(); // 2. Ψάχνει στο background αν υπάρχουν νεότερα από άλλη συσκευή
+        // --- ΠΡΟΣΘΕΣΕ ΑΥΤΑ ΤΑ ΕΙΚΟΝΙΔΙΑ ΓΙΑ ΤΟΝ ΧΑΡΤΗ ΣΟΥ ---
+        const unvisitedIcon = L.divIcon({
+            html: '<div style="background: #3b82f6; border: 3px solid white; border-radius: 50%; width: 16px; height: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-marker',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+        
+        const visitedIcon = L.divIcon({
+            html: '<div style="background: #10b981; border: 3px solid white; border-radius: 50%; width: 16px; height: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-marker',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        window.renderApp = function() {
+            // Διορθώθηκε το id σε 'buildings-list' (στον πληθυντικό)
+            const listContainer = document.getElementById('buildings-list');
+            if (!listContainer) return; // Ασφάλεια
+            
+            listContainer.innerHTML = '';
+            
+            // Καθαρισμός παλιών markers από τον χάρτη αν υπάρχουν
+            for (let key in buildingMarkers) {
+                map.removeLayer(buildingMarkers[key]);
+            }
+            buildingMarkers = {};
+
+            buildings.forEach((b, i) => {
+                // Ζωγραφίζει την κάρτα
+                renderBuildingCard(b, i, listContainer);
+                
+                // Φτιάχνει και τοποθετεί το Marker στον χάρτη!
+                let mIcon = b.visited ? visitedIcon : unvisitedIcon;
+                let marker = L.marker([b.lat, b.lng], { icon: mIcon }).addTo(map)
+                    .bindPopup(`<b style="font-family:Inter, sans-serif;">${b.title}</b>`);
+                
+                // Το αποθηκεύει για να δουλεύει η πλοήγηση και το smart route
+                buildingMarkers[b.id] = marker;
+            });
+            
+            // Διορθώθηκε το σφάλμα του counter (ελέγχει πρώτα αν υπάρχει στην HTML)
+            const counterEl = document.getElementById('counter');
+            if (counterEl) {
+                counterEl.textContent = `${buildings.length} κτίσματα`;
+            }
+        };
 
         // Αρχικοποίηση θέματος
         const savedTheme = localStorage.getItem('sofia_theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
         document.querySelector('.theme-toggle').title = savedTheme === 'dark' ? 'Φωτεινό Θέμα' : 'Σκούρο Θέμα';
+
+        // ΕΚΚΙΝΗΣΗ!
+        window.renderApp(); // 1. Ζωγραφίζει αμέσως τα τοπικά δεδομένα χωρίς καθυστέρηση
+        document.getElementById('progress-bar').style.display = 'none'; // Hide progress bar immediately
+        // loadFromFirebase(); // 2. Απενεργοποιημένο προσωρινά για να μην ενοχλούν τα errors
 
         // Apply dark theme to history divs
         const updateHistoryDivs = () => {
@@ -744,6 +1063,11 @@
         // Watch for theme changes
         const observer = new MutationObserver(updateHistoryDivs);
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // Stop location tracking when page unloads
+        window.addEventListener('beforeunload', function() {
+            stopLocationTracking();
+        });
     </script>
 </body>
 </html>
