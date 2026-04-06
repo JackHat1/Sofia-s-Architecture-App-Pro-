@@ -19,12 +19,29 @@
             --danger: #ef4444;
         }
 
+        [data-theme="dark"] {
+            --primary: #3b82f6; --primary-light: #1e3a8a;
+            --success: #22c55e; --bg-color: #0f172a;
+            --card-bg: #1e293b; --text-main: #f1f5f9;
+            --text-muted: #94a3b8; --route-color: #a855f7;
+            --danger: #ef4444;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg-color) 0%, #f0f9ff 100%); color: var(--text-main); padding-bottom: 90px; padding-top: max(0px, env(safe-area-inset-top)); -webkit-user-select: none; user-select: none; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, var(--bg-color) 0%, #0f172a 100%); color: var(--text-main); padding-bottom: 90px; padding-top: max(0px, env(safe-area-inset-top)); -webkit-user-select: none; user-select: none; transition: background 0.3s ease, color 0.3s ease; }
 
-        header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 18px 20px; padding-top: max(18px, calc(env(safe-area-inset-top) + 8px)); text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 18px 20px; padding-top: max(18px, calc(env(safe-area-inset-top) + 8px)); text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.3s ease; }
+        [data-theme="dark"] header { background: rgba(30, 41, 59, 0.95); border-bottom-color: rgba(255,255,255,0.1); }
         header h3 { margin: 0; font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--route-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        .theme-toggle { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-main); }
+        .theme-toggle:hover { background: rgba(0,0,0,0.1); }
+        [data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.1); }
+
+        .gps-toggle { position: absolute; top: 50%; right: 70px; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s ease; color: var(--text-main); }
+        .gps-toggle:hover { background: rgba(0,0,0,0.1); }
+        [data-theme="dark"] .gps-toggle:hover { background: rgba(255,255,255,0.1); }
 
         #map { height: 35vh; width: 100%; z-index: 1; box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-radius: 0 0 20px 20px; }
         .container { padding: 20px; padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); max-width: 600px; margin: auto; }
@@ -35,11 +52,14 @@
         .building-card { background: var(--card-bg); padding: 20px; margin-bottom: 18px; border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; position: relative; overflow: hidden; transition: all 0.3s ease; animation: fadeInUp 0.5s ease-out; }
         .building-card:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
         .building-card.visited { border-color: var(--success); background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); }
+        [data-theme="dark"] .building-card { border-color: rgba(255,255,255,0.1); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .building-card.visited { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .gallery-container { display: flex; overflow-x: auto; gap: 12px; margin-bottom: 14px; padding-bottom: 10px; scroll-snap-type: x mandatory; border-radius: 12px; }
         .gallery-container::-webkit-scrollbar { height: 6px; }
         .gallery-container::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #cbd5e1, #64748b); border-radius: 10px; }
+        [data-theme="dark"] .gallery-container::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #475569, #64748b); }
         .gallery-wrapper { position: relative; flex: 0 0 100%; height: 220px; }
         .gallery-img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; scroll-snap-align: center; background-color: #e2e8f0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .gallery-hint { font-size: 0.8rem; text-align: center; color: var(--text-muted); margin-top: -8px; margin-bottom: 14px; font-weight: 500; animation: fadeIn 0.5s ease-out; }
@@ -47,18 +67,22 @@
 
         .building-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 14px; line-height: 1.3; color: var(--text-main); }
         .info-row { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: flex-start; line-height: 1.5; }
-        .info-row span { font-weight: 700; color: var(--text-main); margin-right: 8px; min-width: 90px; }
+        .info-row span { font-weight: 700; color: var(--text-main); margin-right: 8px; min-width: 20px; }
         
         .btn { width: 100%; padding: 16px 16px; border: none; border-radius: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; position: relative; overflow: hidden; min-height: 50px; display: flex; align-items: center; justify-content: center; -webkit-user-select: none; user-select: none; }
         .btn:active { transform: scale(0.96); }
         
         .btn-visited-no { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: var(--text-muted); border: 2px solid #cbd5e1; font-weight: 700; }
         .btn-visited-no:hover { background: linear-gradient(135deg, #e2e8f0, #cbd5e1); }
+        [data-theme="dark"] .btn-visited-no { background: linear-gradient(135deg, #334155, #475569); border-color: #64748b; color: var(--text-muted); }
+        [data-theme="dark"] .btn-visited-no:hover { background: linear-gradient(135deg, #475569, #64748b); }
         .btn-visited-yes { background: linear-gradient(135deg, var(--success), #059669); color: white; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); font-weight: 700; }
         .btn-visited-yes:hover { box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5); }
         
         .btn-edit { background: linear-gradient(135deg, var(--primary-light), #dbeafe); color: var(--primary); font-weight: 700; }
         .btn-edit:hover { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        [data-theme="dark"] .btn-edit { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; }
+        [data-theme="dark"] .btn-edit:hover { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
         .btn-save { background: linear-gradient(135deg, var(--primary), #2563eb); color: white; margin-top: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
         .btn-save:hover { box-shadow: 0 6px 20px rgba(29, 78, 216, 0.4); }
         .btn-camera { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
@@ -68,8 +92,11 @@
         .photo-delete-btn:active { background: rgba(220, 38, 38, 1); transform: scale(0.92); }
         
         .edit-section { display: none; background: linear-gradient(135deg, #f8fafc, #f1f5f9); padding: 18px; border-radius: 16px; margin-top: 16px; border: 1px solid #e2e8f0; animation: slideDown 0.3s ease-out; }
+        [data-theme="dark"] .edit-section { background: linear-gradient(135deg, #1e293b, #334155); border-color: rgba(255,255,255,0.1); }
         textarea { width: 100%; height: 120px; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-family: inherit; font-size: 16px; resize: none; background: white; transition: all 0.3s ease; -webkit-appearance: none; appearance: none; }
         textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1); }
+        [data-theme="dark"] textarea { background: #334155; border-color: rgba(255,255,255,0.2); color: var(--text-main); }
+        [data-theme="dark"] textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
         
         input[type="file"] { display: none; }
         
@@ -92,16 +119,20 @@
         .fab-route:active { transform: translateX(-50%) scale(0.92); }
         
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: bold; color: var(--primary); flex-direction: column; }
+        [data-theme="dark"] #loading-overlay { background: rgba(15, 23, 42, 0.95); }
         .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 0.8s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         hr { border: 0; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+        [data-theme="dark"] hr { border-top-color: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
     <header>
         <h3>🏛️ Αρχιτεκτονική Έρευνα</h3>
+        <button class="gps-toggle" onclick="window.goToMyLocation()" title="Πήγαινε στην Τοποθεσία μου">📍</button>
+        <button class="theme-toggle" onclick="window.toggleTheme()" title="Αλλαγή Θέματος">🌙</button>
     </header>
 
     <div id="map"></div>
@@ -356,7 +387,12 @@
         let buildings = JSON.parse(localStorage.getItem('sofia_app_data_pro')) || [...rawData];
         
         const map = L.map('map').setView([37.9780, 23.7320], 14);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+        L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.png', {
+            attribution: 'Map tiles by Stamen Design, CC BY 3.0 — Map data © OpenStreetMap contributors',
+            subdomains: 'abcd',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
         let routeLayer = null;
 
         // 2. ΥΒΡΙΔΙΚΗ ΑΠΟΘΗΚΕΥΣΗ (Τοπικά + Cloud ταυτόχρονα!)
@@ -506,6 +542,23 @@
             }
         };
 
+        window.goToMyLocation = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                        L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map).bindPopup("<b>📍 Είσαι Εδώ!</b>").openPopup();
+                    },
+                    (err) => {
+                        alert("Δεν δόθηκε άδεια GPS. Δεν μπορώ να βρω την τοποθεσία σου.");
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert("Το GPS δεν υποστηρίζεται από αυτή τη συσκευή.");
+            }
+        };
+
         function generateRoute(startLat, startLng, unvisited) {
             let route = []; let currentLat = startLat, currentLng = startLng; let remaining = [...unvisited];
 
@@ -544,69 +597,91 @@
             let visitedCount = buildings.filter(b => b.visited).length;
             document.getElementById('progress-bar').innerText = `Πρόοδος: ${visitedCount} από ${buildings.length} 🎯`;
 
-            buildingsToShow.forEach((b) => {
+            // Separate unvisited and visited buildings
+            let unvisitedBuildings = buildingsToShow.filter(b => !b.visited);
+            let visitedBuildings = buildingsToShow.filter(b => b.visited);
+
+            // Render unvisited first (with markers)
+            unvisitedBuildings.forEach((b) => {
                 let originalIndex = buildings.findIndex(orig => orig.id === b.id);
-                let markerIcon = b.visited ? '🟢' : '📍';
+                let markerIcon = '📍';
                 let marker = L.marker([b.lat, b.lng]).addTo(map).bindPopup(`<b>${markerIcon} ${b.title}</b>`);
                 buildingMarkers[b.id] = marker; // Store marker reference
 
-                let photosArray = b.user_photos ? [...b.user_photos] : [];
-                let galleryHTML = `<div class="gallery-container">`;
-                galleryHTML += `<img src="${b.photo_url}" class="gallery-img" onerror="this.style.display='none'">`;
-                photosArray.forEach((imgUrl, photoIdx) => {
-                    galleryHTML += `
-                        <div class="gallery-wrapper">
-                            <img src="${imgUrl}" class="gallery-img">
-                            <button class="photo-delete-btn" onclick="window.removePhoto(${originalIndex}, ${photoIdx})">✕</button>
-                        </div>
-                    `;
+                renderBuildingCard(b, originalIndex, listContainer);
+            });
+
+            // Render visited buildings at the bottom (no markers)
+            if (visitedBuildings.length > 0) {
+                const separator = document.createElement('div');
+                separator.style.cssText = 'text-align: center; margin: 20px 0; color: var(--text-muted); font-weight: 600;';
+                separator.innerHTML = '✅ Επισκεφθέντα Κτήρια';
+                listContainer.appendChild(separator);
+
+                visitedBuildings.forEach((b) => {
+                    let originalIndex = buildings.findIndex(orig => orig.id === b.id);
+                    renderBuildingCard(b, originalIndex, listContainer);
                 });
-                galleryHTML += `</div>`;
-                
-                let hintHTML = (photosArray.length > 0) ? `<div class="gallery-hint">↔️ Σύρε αριστερά/δεξιά για φωτογραφίες</div>` : ``;
+            }
+        };
 
-                const card = document.createElement('div');
-                card.className = `building-card ${b.visited ? 'visited' : ''}`;
-                card.innerHTML = `
-                    ${galleryHTML}
-                    ${hintHTML}
-                    <div class="building-title">${b.title}</div>
-                    <div class="info-row"><span>📍</span> ${b.address || '-'}</div>
-                    <div class="info-row"><span>👨‍🎨</span> ${b.architect || '-'}</div>
-                    <div class="info-row"><span>🛠️</span> ${b.type || '-'}</div>
-                    
-                    <button class="btn ${b.visited ? 'btn-visited-yes' : 'btn-visited-no'}" onclick="window.toggleVisited(${originalIndex})">
-                        ${b.visited ? '✅ Το επισκέφτηκα' : '⭕ Σημείωσε ότι το επισκέφτηκα'}
-                    </button>
-
-                    <button class="btn btn-edit" onclick="window.toggleEdit(${originalIndex})">📝 Σημειώσεις & Φωτό</button>
-
-                    <div class="edit-section" id="edit-${originalIndex}">
-                        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; line-height:1.7; background:#fff; padding:12px; border-radius:10px; border-left:3px solid var(--primary);">
-                            <b>📚 Ιστορικό/Ανάλυση:</b><br>
-                            <div id="history-${originalIndex}"></div>
-                        </div>
-                        
-                        <hr>
-                        
-                        <label style="display:block; margin-bottom:12px; font-weight:700; color:var(--text-main); font-size:0.95rem;">✍️ Οι δικές σου εντυπώσεις:</label>
-                        <textarea id="notes-${originalIndex}" placeholder="Γράψε ό,τι θέλεις να θυμάσαι...">${b.notes || ''}</textarea>
-                        <button class="btn btn-save" onclick="window.saveNotes(${originalIndex})">💾 Αποθήκευση</button>
-                        
-                        <hr>
-                        
-                        <label class="btn btn-camera" style="cursor:pointer; margin-top:0;">
-                            📸 Πρόσθεσε Φωτογραφία
-                            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="window.uploadPhoto(${originalIndex}, this.files[0])">
-                        </label>
+        function renderBuildingCard(b, originalIndex, listContainer) {
+            let photosArray = b.user_photos ? [...b.user_photos] : [];
+            let galleryHTML = `<div class="gallery-container">`;
+            galleryHTML += `<img src="${b.photo_url}" class="gallery-img" onerror="this.style.display='none'">`;
+            photosArray.forEach((imgUrl, photoIdx) => {
+                galleryHTML += `
+                    <div class="gallery-wrapper">
+                        <img src="${imgUrl}" class="gallery-img">
+                        <button class="photo-delete-btn" onclick="window.removePhoto(${originalIndex}, ${photoIdx})">✕</button>
                     </div>
                 `;
-                listContainer.appendChild(card);
-                
-                // Set history HTML after card is added
-                const historyDiv = document.getElementById(`history-${originalIndex}`);
-                if (historyDiv) historyDiv.innerHTML = b.history || '-';
             });
+            galleryHTML += `</div>`;
+            
+            let hintHTML = (photosArray.length > 0) ? `<div class="gallery-hint">↔️ Σύρε αριστερά/δεξιά για φωτογραφίες</div>` : ``;
+
+            const card = document.createElement('div');
+            card.className = `building-card ${b.visited ? 'visited' : ''}`;
+            card.innerHTML = `
+                ${galleryHTML}
+                ${hintHTML}
+                <div class="building-title">${b.title}</div>
+                <div class="info-row"><span>📍</span> ${b.address || '-'}</div>
+                <div class="info-row"><span>👨‍🎨</span> ${b.architect || '-'}</div>
+                <div class="info-row"><span>🛠️</span> ${b.type || '-'}</div>
+                
+                <button class="btn ${b.visited ? 'btn-visited-yes' : 'btn-visited-no'}" onclick="window.toggleVisited(${originalIndex})">
+                    ${b.visited ? '✅ Το επισκέφτηκα' : '⭕ Σημείωσε ότι το επισκέφτηκα'}
+                </button>
+
+                <button class="btn btn-edit" onclick="window.toggleEdit(${originalIndex})">📝 Σημειώσεις & Φωτό</button>
+
+                <div class="edit-section" id="edit-${originalIndex}">
+                    <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px; line-height:1.7; background:#fff; padding:12px; border-radius:10px; border-left:3px solid var(--primary);">
+                        <b>📚 Ιστορικό/Ανάλυση:</b><br>
+                        <div id="history-${originalIndex}"></div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <label style="display:block; margin-bottom:12px; font-weight:700; color:var(--text-main); font-size:0.95rem;">✍️ Οι δικές σου εντυπώσεις:</label>
+                    <textarea id="notes-${originalIndex}" placeholder="Γράψε ό,τι θέλεις να θυμάσαι...">${b.notes || ''}</textarea>
+                    <button class="btn btn-save" onclick="window.saveNotes(${originalIndex})">💾 Αποθήκευση</button>
+                    
+                    <hr>
+                    
+                    <label class="btn btn-camera" style="cursor:pointer; margin-top:0;">
+                        📸 Πρόσθεσε Φωτογραφία
+                        <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="window.uploadPhoto(${originalIndex}, this.files[0])">
+                    </label>
+                </div>
+            `;
+            listContainer.appendChild(card);
+            
+            // Set history HTML after card is added
+            const historyDiv = document.getElementById(`history-${originalIndex}`);
+            if (historyDiv) historyDiv.innerHTML = b.history || '-';
         }
 
         window.toggleVisited = function(i) { 
@@ -626,9 +701,49 @@
             alert("✅ Οι σημειώσεις αποθηκεύτηκαν!");
         };
 
+        window.toggleTheme = function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('sofia_theme', newTheme);
+            
+            const toggleBtn = document.querySelector('.theme-toggle');
+            toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            toggleBtn.title = newTheme === 'dark' ? 'Φωτεινό Θέμα' : 'Σκούρο Θέμα';
+            
+            // Update history div backgrounds
+            const historyDivs = document.querySelectorAll('[id^="history-"]');
+            historyDivs.forEach(div => {
+                div.parentElement.style.background = newTheme === 'dark' ? '#1e293b' : '#fff';
+            });
+        };
+
         // ΕΚΚΙΝΗΣΗ!
         window.renderApp(); // 1. Ζωγραφίζει αμέσως τα τοπικά δεδομένα χωρίς καθυστέρηση
         loadFromFirebase(); // 2. Ψάχνει στο background αν υπάρχουν νεότερα από άλλη συσκευή
+
+        // Αρχικοποίηση θέματος
+        const savedTheme = localStorage.getItem('sofia_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        document.querySelector('.theme-toggle').title = savedTheme === 'dark' ? 'Φωτεινό Θέμα' : 'Σκούρο Θέμα';
+
+        // Apply dark theme to history divs
+        const updateHistoryDivs = () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const historyDivs = document.querySelectorAll('[id^="history-"]');
+            historyDivs.forEach(div => {
+                div.parentElement.style.background = isDark ? '#1e293b' : '#fff';
+            });
+        };
+        
+        // Initial update
+        updateHistoryDivs();
+        
+        // Watch for theme changes
+        const observer = new MutationObserver(updateHistoryDivs);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     </script>
 </body>
 </html>
