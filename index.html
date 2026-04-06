@@ -1058,7 +1058,7 @@ window.navigateToBuilding = function(buildingId) {
         // ΕΚΚΙΝΗΣΗ!
         window.renderApp(); // 1. Ζωγραφίζει αμέσως τα τοπικά δεδομένα χωρίς καθυστέρηση
         document.getElementById('progress-bar').style.display = 'none'; // Hide progress bar immediately
-        // loadFromFirebase(); // 2. Απενεργοποιημένο προσωρινά για να μην ενοχλούν τα errors
+        loadFromFirebase(); // 2. Απενεργοποιημένο προσωρινά για να μην ενοχλούν τα errors
 
         // Apply dark theme to history divs
         const updateHistoryDivs = () => {
